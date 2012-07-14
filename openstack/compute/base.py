@@ -25,13 +25,25 @@ class Manager(object):
         resp, body = self.api.client.get(url)
         return [self.resource_class(self, res) for res in body[response_key]]
     
-    def _get(self, url, response_key):
+    def _get(self, url, response_key=None):
         resp, body = self.api.client.get(url)
+        if response_key:
+            info = body[response_key]
+        else:
+            info = body
         return self.resource_class(self, body[response_key])
     
-    def _create(self, url, body, response_key):
+    def _create(self, url, body, response_key=None):
         resp, body = self.api.client.post(url, body=body)
-        return self.resource_class(self, body[response_key])
+        if response_key:
+            info = body[response_key]            
+        else:
+            info = body
+
+        if isinstance(info, list):
+            return [self.resource_class(self, node) for node in info]
+        else:
+            return self.resource_class(self, info)
         
     def _delete(self, url):
         resp, body = self.api.client.delete(url)

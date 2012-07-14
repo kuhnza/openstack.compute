@@ -1,3 +1,5 @@
+from openstack.compute.load_balancers import LoadBalancerManager
+
 __version__ = '2.0a1'
 
 import os
@@ -50,6 +52,7 @@ class Compute(object):
         self.flavors = FlavorManager(self)
         self.images = ImageManager(self)
         self.servers = ServerManager(self)
+        self.load_balancers = LoadBalancerManager(self)
         if 'IPGROUPS' in API_OPTIONS[self.config.cloud_api]:
             self.ipgroups = IPGroupManager(self)
 

@@ -382,3 +382,150 @@ class FakeClient(ComputeClient):
     def delete_shared_ip_groups_1(self, **kw):
             return (204, None)
             return (501, {u'notImplemented': {u'message': u'The server has either erred or is incapable of performing\r\nthe requested operation.\r\n', u'code': 501}})
+
+    # 
+    # Load balancers
+    #
+    def get_loadbalancers(self, **kw):
+        return (200, {
+            "loadBalancers":[
+                {
+                    "name":"lb-site1",
+                    "id":71,
+                    "protocol":"HTTP",
+                    "port":80,
+                    "algorithm":"RANDOM",
+                    "status":"ACTIVE",
+                    "nodeCount":"3",
+                    "virtualIps":[
+                            {
+                            "id":403,
+                            "address":"206.55.130.1",
+                            "type":"PUBLIC",
+                            "ipVersion":"IPV4"
+                        }
+                    ],
+                    "created":{
+                        "time":"2010-11-30T03:23:42Z"
+                    },
+                    "updated":{
+                        "time":"2010-11-30T03:23:44Z"
+                    }
+                },{
+                    "name":"lb-site2",
+                    "id":166,
+                    "protocol":"HTTP",
+                    "port":80,
+                    "algorithm":"RANDOM",
+                    "status":"ACTIVE",
+                    "nodeCount":"4",
+                    "virtualIps":[
+                        {
+                            "id":401,
+                            "address":"206.55.130.2",
+                            "type":"PUBLIC",
+                            "ipVersion":"IPV4"
+                        }
+                    ],
+                    "created":{
+                        "time":"2010-11-30T03:23:42Z"
+                    },
+                    "updated":{
+                        "time":"2010-11-30T03:23:44Z"
+                    }
+                }
+            ]
+        })
+
+    def get_loadbalancers_71(self, **kw):        
+        return (200, { "loadBalancer": self.get_loadbalancers()[1]['loadBalancers'][0] })
+
+    def get_loadbalancers_166(self, **kw):        
+        return (200, { "loadBalancer": self.get_loadbalancers()[1]['loadBalancers'][1] })
+
+    def post_loadbalancers(self, body, **kw):
+        assert_equal(body.keys(), ['loadBalancer'])
+        assert_has_keys(body['loadBalancer'],
+                        required = ['name', 'nodes', 'protocol', 'virtualIps'],
+                        optional = ['accessList', 'algorithm', 'connectionLogging', 'connectionThrottle', 'healthMonitor', 'metadata', 'port', 'sessionPersistence'])
+        return (202, self.get_loadbalancers_71()[1])
+
+    def put_loadbalancers_71(self, body, **kw):
+        assert_equal(body.keys(), ['loadBalancer'])
+        assert_has_keys(body['loadBalancer'], optional=['name', 'algorithm', 'protocol', 'port'])
+        return (202, None)   
+
+    def delete_loadbalancers_71(self, **kw):
+        return (204, None)
+
+    def get_loadbalancers_71_virtualips(self, **kw):
+        return (200, {"virtualIps": [
+                {
+                    "id": 1000,
+                    "address": "206.10.10.210",
+                    "type": "PUBLIC"
+                }
+            ]
+        })
+
+    def post_loadbalancers_71_virtualips(self, body, **kw):
+        assert_has_keys(body, required=['type'], optional=['ipVersion'])
+        return (200, {
+            "address":"fd24:f480:ce44:91bc:1af2:15ff:0000:0002",
+            "id":9000134,
+            "type":"PUBLIC",
+            "ipVersion":"IPV6"
+        })
+
+    def delete_loadbalancers_71_virtualips_1000(self, **kw):
+        return (200, None)
+
+    def get_loadbalancers_71_nodes(self, **kw):
+        return (200, {
+            "nodes": [
+                {
+                    "id":410,
+                    "address":"10.1.1.1",
+                    "port":80,
+                    "condition":"ENABLED",
+                    "status":"ONLINE",
+                    "weight":3,
+                    "type":"PRIMARY"
+                },
+                {
+                    "id":411,
+                    "address":"10.1.1.2",
+                    "port":80,
+                    "condition":"ENABLED",
+                    "status":"ONLINE",
+                    "weight":8,
+                    "type":"SECONDARY"
+                },
+                {
+                    "id":412,
+                    "address":"10.1.1.3",
+                    "port":80,
+                    "condition":"DISABLED",
+                    "status":"ONLINE",
+                    "weight":12,
+                    "type":"SECONDARY"
+                }
+            ]
+        })
+
+    def get_loadbalancers_71_nodes_410(self, **kw):
+        return (200, {"node": self.get_loadbalancers_71_nodes()[1]['nodes'][0]})
+
+    def post_loadbalancers_71_nodes(self, body, **kw):
+        assert_equal(body.keys(), ['nodes'])
+        assert_has_keys(body['nodes'], required=['address', 'condition', 'port'],
+                                       optional=['type', 'weight'])
+        return (200, self.get_loadbalancers_71_nodes()[1])
+
+    def put_loadbalancers_71_nodes_410(self, body, **kw):
+        assert_equal(body.keys(), ['node'])
+        assert_has_keys(body['node'], optional=['condition', 'type', 'weight'])
+        return (200, None)
+
+    def delete_loadbalancers_71_nodes_410(self, **kw):
+        return (200, None)
